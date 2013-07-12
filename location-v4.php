@@ -23,10 +23,14 @@ class acf_field_location extends acf_field
 		$this->label = __('Location Map','acf-location-field');
 		$this->category = __('Content','acf');
 		$this->defaults = array(
+			'mapheight'	=>	'300',
 			'center' => '48.856614,2.3522219000000177',
-			'zoom'	=>	16,
+			'zoom'	=>	10,
 			'val'	=>	'address',
-			'scrollwheel'	=>	1
+			'scrollwheel'	=>	1,
+			'mapTypeControl'	=>	1,
+			'streetViewControl'	=>	1,
+			'PointOfInterest'	=>	1,
 		);
 		
 		
@@ -139,10 +143,31 @@ class acf_field_location extends acf_field
 		?>
 	</td>
 </tr>
+
+<tr class="field_option field_option_<?php echo $this->name; ?>">
+	<td class="label">
+		<label><?php _e('Map height','acf-location-field'); ?></label>
+		<p class="description"><?php _e('Height of the map. Minimum height is 150px','acf-location-field'); ?></p>
+	</td>
+	<td>
+		<?php
+		if( $field['mapheight'] <= '150' )
+		{
+			$field['mapheight'] = '150';
+		}
+
+		do_action('acf/create_field', array(
+			'type'	=>	'number',
+			'name'	=>	'fields['.$key.'][mapheight]',
+			'value'	=>	$field['mapheight']
+		));
+		?> px
+	</td>
+</tr>
 <tr class="field_option field_option_<?php echo $this->name; ?>">
 	<td class="label">
 		<label><?php _e('Map center','acf-location-field'); ?></label>
-		<p class="description"><?php _e('Latitude and longitude to center the initial map.','acf-location-field'); ?></p>
+		<p class="description"><?php _e('Latitude and longitude to center the initial map','acf-location-field'); ?></p>
 	</td>
 	<td>
 		<?php
@@ -189,6 +214,68 @@ class acf_field_location extends acf_field
 		?>
 	</td>
 </tr>
+<tr class="field_option field_option_<?php echo $this->name; ?>">
+	<td class="label">
+		<label><?php _e('Map Type Control','acf-location-field'); ?></label>
+		<p class="description"><?php _e('Show controls for Map Type (Satellite, Hybrid)','acf-location-field'); ?></p>
+	</td>
+	<td>
+		<?php
+		do_action('acf/create_field', array(
+			'type' => 'radio',
+			'name' => 'fields['.$key.'][mapTypeControl]',
+			'value' => $field['mapTypeControl'],
+			'layout' => 'horizontal',
+			'choices' => array(
+				1 => __('Yes', 'acf-location-field'),
+				0 => __('No', 'acf-location-field')
+			)
+		));
+		?>
+	</td>
+</tr>
+<tr class="field_option field_option_<?php echo $this->name; ?>">
+	<td class="label">
+		<label><?php _e('Street View Control','acf-location-field'); ?></label>
+		<p class="description"><?php _e('Show controls for Street View','acf-location-field'); ?></p>
+	</td>
+	<td>
+		<?php
+		do_action('acf/create_field', array(
+			'type' => 'radio',
+			'name' => 'fields['.$key.'][streetViewControl]',
+			'value' => $field['streetViewControl'],
+			'layout' => 'horizontal',
+			'choices' => array(
+				1 => __('Yes', 'acf-location-field'),
+				0 => __('No', 'acf-location-field')
+			)
+		));
+		?>
+	</td>
+</tr>
+<tr class="field_option field_option_<?php echo $this->name; ?>">
+	<td class="label">
+		<label><?php _e('Point Of Interest','acf-location-field'); ?></label>
+		<p class="description"><?php _e('Show places on the map','acf-location-field'); ?></p>
+	</td>
+	<td>
+		<?php
+		do_action('acf/create_field', array(
+			'type' => 'radio',
+			'name' => 'fields['.$key.'][PointOfInterest]',
+			'value' => $field['PointOfInterest'],
+			'layout' => 'horizontal',
+			'choices' => array(
+				1 => __('Yes', 'acf-location-field'),
+				0 => __('No', 'acf-location-field')
+			)
+		));
+		?>
+	</td>
+</tr>
+
+
 		<?php
 		
 	}
@@ -219,7 +306,10 @@ class acf_field_location extends acf_field
 		$zoom = $field['zoom'];
 		$center = explode(',', $field['center']);
 		$scrollwheel = $field['scrollwheel'];
-
+		$mapTypeControl = $field['mapTypeControl'];
+		$streetViewControl = $field['streetViewControl'];
+		$PointOfInterest = $field['PointOfInterest'];
+		$mapheight = $field['mapheight'];
 		?>
 <script type="text/javascript">
 	function location_init(uid){
@@ -287,12 +377,27 @@ class acf_field_location extends acf_field
 			lng = <?php echo $center[1];?>
 		}
 		latlng = new google.maps.LatLng(lat,lng);
+		
+		// Enable the visual refresh
+		google.maps.visualRefresh = true;
+
 		var mapOptions = {
 			zoom:<?php echo $zoom;?>,
+			mapTypeControl: <?php echo $mapTypeControl; ?>,
+			streetViewControl: <?php echo $streetViewControl; ?>,
 			center:latlng,
-			mapTypeId:google.maps.MapTypeId.ROADMAP,scrollwheel: <?php echo $scrollwheel; ?>
+			mapTypeId:google.maps.MapTypeId.ROADMAP,scrollwheel: <?php echo $scrollwheel; ?>,
+			styles:[{
+				featureType:"poi",
+				elementType:"labels",
+				stylers:[{
+					visibility:"<?php if ($PointOfInterest == true) echo 'on'; else echo 'off' ?>"
+					}]
+				}]
 		};
 		map = new google.maps.Map(document.getElementById('location_map_'+uid),mapOptions);
+		var mapdiv = document.getElementById('location_map_'+uid);
+		mapdiv.style.height = '<?php echo $mapheight; ?>px';
 		if(coordinates){
 			addMarker(map.getCenter())
 		}
@@ -349,9 +454,7 @@ class acf_field_location extends acf_field
 </div>
 		<?php
 	}
-	
-	
-	
+
 	/*
 	*  format_value_for_api()
 	*
@@ -384,9 +487,9 @@ class acf_field_location extends acf_field
 		{
 			$value = $value[1];
 		}
-		
-		
+	
 		return $value;
+				
 	}
 	
 }

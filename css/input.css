@@ -1,4 +1,4 @@
-﻿.location_dl {margin-left:10px;}
+.location_dl {margin-left:10px;}
 .location_dl::after 
 {
 	content:"";
@@ -35,8 +35,8 @@
 	position:relative;
 	z-index:0;
 	width:100%;
-	height:300px;
 	clear:both;
+	min-height: 150px;
 }
 .location_map-container 
 {
