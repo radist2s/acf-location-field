@@ -52,6 +52,36 @@ Retrieving the value(s) on the front-end differs according to the Map address op
 ` $location = get_field('location'); echo $location['address']; echo $location['coordinates']; `
 * Coordinates 
 ` the_field('location'); `
+*Google maps V3 
+
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+<script>
+    var map;
+    var myLatLang = new google.maps.LatLng( <?php  $location = get_field('location'); echo $location['coordinates']; ?>);
+    function initialize() {
+        var mapOptions = {
+            zoom: 8,
+            center: myLatLang,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'),
+        mapOptions);
+        var marker = new google.maps.Marker({
+            position: myLatLang,
+            map: map,
+            title:"Hello World!"
+        });
+    };
+    google.maps.event.addDomListener(window, 'load', initialize);
+    $('.bxslider').bxSlider({
+        minSlides: 5,
+        maxSlides: 5,
+        slideWidth: 192,
+        slideMargin: 0,
+        adaptiveHeight: true
+    });
+</script>
+<div id="map-canvas"></div>
 
 == Installation ==
 
