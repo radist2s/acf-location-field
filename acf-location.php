@@ -34,7 +34,7 @@ class acf_field_location_plugin
 
 		
 		// version 3-
-		add_action( 'init', array( $this, 'init' ));
+		add_action( 'init', array( $this, 'init' ), 1, 1);
 	}
 	
 	
